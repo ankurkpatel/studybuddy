@@ -17,15 +17,15 @@ export default async function IndexPage() {
   const id = nanoid()
   const session = (await auth()) as Session
   const missingKeys = await getMissingKeys()
-  const book = JSON.parse(await getBook());
-  uploadPinecone();
+  // const book = JSON.parse(await getBook());
+  // uploadPinecone();
 
 
   return (
     <div className="flex h-[calc(100vh_-_theme(spacing.16))]">
        <AI initialAIState={{ chatId: id, messages: [] }}>
       <div className="sm:hidden md:block md:w-7/12 overflow-auto p-10">
-     <BookReader book = {book}></BookReader>
+     <BookReader/>
 
       </div>
       <div className="md:w-5/12  overflow-auto ">

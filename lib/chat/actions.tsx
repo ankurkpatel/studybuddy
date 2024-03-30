@@ -35,6 +35,7 @@ import { saveChat } from '@/app/actions'
 import { SpinnerMessage, UserMessage } from '@/components/stocks/message'
 import { Chat } from '@/lib/types'
 import { auth } from '@/auth'
+import { getContext } from '../pdf/pdf-actions'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || ''
@@ -124,6 +125,8 @@ async function confirmPurchase(symbol: string, price: number, amount: number) {
 async function submitUserMessage(content: string) {
   'use server'
 
+  const augmentatedPrompt = await getContext({prompt : content, page : '0'})
+  console.log(augmentatedPrompt);
   const aiState = getMutableAIState<typeof AI>()
 
   aiState.update({
@@ -152,11 +155,14 @@ async function submitUserMessage(content: string) {
 you're name is Eklavya - ai study buddy. You will help answer any questions about book in question, Explain topics help them memorize, provide them different tricks that help user memorize the concepts better. Also provide easier explaination of the hard concept.
         `
       },
-      ...aiState.get().messages.map((message: any) => ({
+      ...aiState.get().messages.slice(0,-1).map((message: any) => ({
         role: message.role,
         content: message.content,
         name: message.name
-      }))
+      })),
+      ...aiState.get().messages.slice(-1).map((message) => ({role: message.role,
+        content: augmentatedPrompt,
+        name: message.name}))
     ],
     text: ({ content, done, delta }) => {
       if (!textStream) {
